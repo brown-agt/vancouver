@@ -40,18 +40,18 @@ for i in range(N_ITERATIONS):
     # Evaluates this according to simple average. 
     values_via_avg = average_voting.evaluate_items(graph)
     av, ac = eval_quality(values_via_avg)
-    print "  Via average: ", av, ac
+    print("  Via average: ", av, ac)
     avs.append(av)
     acs.append(ac)
     # Evaluates this according to the reputation system.
     values_via_rep = reputation_instrumented.evaluate_items(graph, do_plots=DO_PLOTS)
     rv, rc = eval_quality(values_via_rep)
-    print "  Via reputation:", rv, rc
+    print("  Via reputation:", rv, rc)
     rvs.append(rv)
     rcs.append(rc)
-print "Stdev via average:", np.average(avs)
-print "Stdev via reputation:", np.average(rvs)
-print "Correlation via average:", np.average(acs)
-print "Correlation via reputation:", np.average(rcs)
+print("Stdev via average:", np.average(avs))
+print("Stdev via reputation:", np.average(rvs))
+print("Correlation via average:", np.average(acs))
+print("Correlation via reputation:", np.average(rcs))
 
 

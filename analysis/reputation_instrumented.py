@@ -411,13 +411,13 @@ class test_reputation(unittest.TestCase):
         g.add_review('anna', 'pasta', 8.5)
         g.add_review('anna', 'pollo', 5.5)
         evaluate_items(g)
-        print 'pasta', g.get_item('pasta').grade
-        print 'pizza', g.get_item('pizza').grade
-        print 'pollo', g.get_item('pollo').grade
-        print 'luca', g.get_user('luca').variance
-        print 'mike', g.get_user('mike').variance
-        print 'hugo', g.get_user('hugo').variance
-        print 'anna', g.get_user('anna').variance
+        print('pasta', g.get_item('pasta').grade)
+        print('pizza', g.get_item('pizza').grade)
+        print('pollo', g.get_item('pollo').grade)
+        print('luca', g.get_user('luca').variance)
+        print('mike', g.get_user('mike').variance)
+        print('hugo', g.get_user('hugo').variance)
+        print('anna', g.get_user('anna').variance)
 
 
 if __name__ == '__main__':

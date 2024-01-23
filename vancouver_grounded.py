@@ -32,10 +32,14 @@ class Item:
     def __init__(self, id):
         self.id = id
         self.users = set()
+        self.ta_grade = None
         self.grade = None
     
     def add_user(self, u):
         self.users = self.users | set([u])
+
+    def add_ta_grade(self, grade):
+        self.ta_grade = grade
 
 
 class Graph:
@@ -67,6 +71,17 @@ class Graph:
         # Adds the connection between the two.
         u.add_item(it, grade)
         it.add_user(u)
+    
+    def add_ta_review(self, item_id, grade):
+        # Gets, or creates, the item.
+        if item_id in self.item_dict:
+            it = self.item_dict[item_id]
+        else:
+            it = Item(item_id)
+            self.item_dict[item_id] = it
+            self.items = self.items | set([it])
+        # Adds the TA review.
+        it.add_ta_grade(grade)
         
     def get_user(self, username):
         return self.user_dict.get(username)
@@ -129,9 +144,9 @@ class Graph:
                     weights /= np.sum(weights)
                     msg = Msg()
                     msg.item = it
-                    msg.grade = aggregate(grades, weights=weights)
+                    msg.grade = it.ta_grade if it.ta_grade else aggregate(grades, weights=weights) # TODO
                     # Now I need to estimate the standard deviation of the grade. 
-                    msg.variance = np.sum(variances * weights * weights)
+                    msg.variance = self.basic_precision if it.ta_grade else np.sum(variances * weights * weights) # TODO
                     u.msgs.append(msg)
     
     
@@ -192,8 +207,8 @@ class Graph:
                 variances = np.array(variances)
                 weights = 1.0 / (self.basic_precision + variances)
                 weights /= np.sum(weights)
-                it.grade = aggregate(grades, weights=weights)
-                it.variance = np.sum(variances * weights * weights)
+                it.grade = it.ta_grade if it.ta_grade else aggregate(grades, weights=weights) # TODO
+                it.variance = self.basic_precision if it.ta_grade else np.sum(variances * weights * weights) # TODO
     
     
     def _aggregate_user_messages(self):
@@ -370,6 +385,7 @@ class test_reputation(unittest.TestCase):
         g.add_review('anna', 'pollo', 5.5)
         g.add_review('carl', 'pollo', 5.4)
         g.add_review('luca', 'steak', 6.0)
+        g.add_ta_review('pasta', 10.0) # TODO
         g.evaluate_items()
         print('pasta', g.get_item('pasta').grade)
         print('pizza', g.get_item('pizza').grade)
