@@ -71,7 +71,7 @@ class Graph:
         # Adds the connection between the two.
         u.add_item(it, grade)
         it.add_user(u)
-    
+
     def add_ta_review(self, item_id, grade):
         # Gets, or creates, the item.
         if item_id in self.item_dict:
@@ -98,7 +98,7 @@ class Graph:
                 m = Msg()
                 m.user = u
                 m.grade = u.grade[it]
-                m.variance = 1.0
+                m.variance = self._compute_init_variance_msg(u, it) # TODO
                 it.msgs.append(m)
         # Does the propagation iterations.
         for i in range(n_iterations):
@@ -119,6 +119,14 @@ class Graph:
             it.grade = aggregate(grades)
             
     
+    def _compute_init_variance_msg(self, user, item):
+        variance_estimates = []
+        for it in user.items:
+            if it != item and it.ta_grade is not None:
+                variance_estimates.append((user.grade[it] - it.ta_grade) ** 2.0)
+        return aggregate(variance_estimates) if variance_estimates else 1.0
+
+
     def _propagate_from_items(self):
         """Propagates the information from items to users."""
         # First, clears all incoming messages.
@@ -144,9 +152,9 @@ class Graph:
                     weights /= np.sum(weights)
                     msg = Msg()
                     msg.item = it
-                    msg.grade = it.ta_grade if it.ta_grade is not None else aggregate(grades, weights=weights) # TODO
+                    msg.grade = aggregate(grades, weights=weights)
                     # Now I need to estimate the standard deviation of the grade. 
-                    msg.variance = self.basic_precision if it.ta_grade is not None else np.sum(variances * weights * weights) # TODO
+                    msg.variance = np.sum(variances * weights * weights)
                     u.msgs.append(msg)
     
     
@@ -207,8 +215,8 @@ class Graph:
                 variances = np.array(variances)
                 weights = 1.0 / (self.basic_precision + variances)
                 weights /= np.sum(weights)
-                it.grade = it.ta_grade if it.ta_grade is not None else aggregate(grades, weights=weights) # TODO
-                it.variance = self.basic_precision if it.ta_grade is not None else np.sum(variances * weights * weights) # TODO
+                it.grade = aggregate(grades, weights=weights)
+                it.variance = np.sum(variances * weights * weights)
     
     
     def _aggregate_user_messages(self):
