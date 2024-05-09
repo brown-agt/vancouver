@@ -3,6 +3,7 @@
 
 import numpy as np
 import unittest
+import csv
 
 
 # Do we debias grades?
@@ -415,5 +416,41 @@ class test_reputation(unittest.TestCase):
         # some test case that exposes Keynesian beauty contest
 
 if __name__ == '__main__':
-    unittest.main()
-    pass
+    # unittest.main()
+    graph = Graph()
+    emails = set()
+    ids = set()
+    with open('peer-grading.csv', newline='') as csvfile:
+        reader = csv.reader(csvfile)
+        skip = True
+        for row in reader:
+            if skip:
+                skip = False
+                continue
+            email, s1, g1, s2, g2, s3, g3 = row
+            emails.add(email)
+            ids.add(s1)
+            ids.add(s2)
+            ids.add(s3)
+            g1 = float(g1)
+            g2 = float(g2)
+            g3 = float(g3)
+            graph.add_review(email, s1, g1)
+            graph.add_review(email, s2, g2)
+            graph.add_review(email, s3, g3)
+
+    graph.evaluate_items()
+    with open('scores.csv', 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(['Submission ID', 'Score'])
+        for id in ids:
+            writer.writerow([id, graph.get_item(id).grade])
+            print(f'Score for submission {id}: {graph.get_item(id).grade}')
+    graph.evaluate_users()
+    with open('qualities.csv', 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(['Email', 'Quality'])
+        for email in emails:
+            writer.writerow([email, graph.get_user(email).quality])
+            print(f'Quality for user {email}: {graph.get_user(email).quality}')
+    
